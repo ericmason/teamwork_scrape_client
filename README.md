@@ -1,8 +1,8 @@
 # TeamworkScrapeClient
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/teamwork_scrape_client`. To experiment with that code, run `bin/console` for an interactive prompt.
+Unofficial Teamwork.com scraping client to supplement the official API. Provides the ability to copy projects.
 
-TODO: Delete this and the text above, and describe your gem
+**WARNING:** This library uses undocumented APIs intended for use by the Teamwork.com web interface to communicate with the server. If they change the API, this library may break.
 
 ## Installation
 
@@ -22,7 +22,10 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+client = TeamworkScrapeClient::Client.new(email: 'youremail@example.com', password: 'secret_password', base_url: 'https://yourdomain.teamwork.com')
+client.copy_project(old_project_id: 12345, new_company_name: "Test Company", new_project_name: "Test Project")
+```
 
 ## Development
 

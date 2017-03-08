@@ -8,9 +8,13 @@ module TeamworkScrapeClient
     def initialize(options = {})
       @email = options[:email]
       @password = options[:password]
-      @base_url = options[:base_url] || "https://equisolve.teamwork.com"
+      @base_url = options[:base_url]
 
-      login(email, password)    
+      raise ArgumentError, 'email is required' unless @email
+      raise ArgumentError, 'password is required' unless @password
+      raise ArgumentError, 'base_url is required' unless @base_url
+
+      login(email, password)
     end
 
     def mech
@@ -20,21 +24,21 @@ module TeamworkScrapeClient
     end
 
     def login(email, password)
-      response = mech.post(
+      mech.post(
         "#{base_url}/v/1/login.json?getInitialPage=true",
-        {username: email, password: password, rememberMe: false}.to_json,
-        {'Content-Type' => 'application/json'}
+        { username: email, password: password, rememberMe: false }.to_json,
+        { 'Content-Type' => 'application/json' }
       )
     end
 
     def profile
       response = mech.get('/me.json',
-                fullprofile: 1,
-                getPreferences: 1,
-                cleanPreferences: true,
-                getAccounts: 1,
-                includeAuth: 1,
-                includeClockIn:1)
+                          fullprofile: 1,
+                          getPreferences: 1,
+                          cleanPreferences: true,
+                          getAccounts: 1,
+                          includeAuth: 1,
+                          includeClockIn: 1)
       JSON.parse(response.body)['profile']
     end
 
@@ -58,9 +62,8 @@ module TeamworkScrapeClient
 
     def project_by_name(project_name)
       response = mech.get("/projects.json?getActivePages=true&searchCompany=true&formatMarkdown=false&status=active&getCategoryPath=1&userId=0&page=1&pageSize=500&orderBy=lastActivityDate&orderMode=DESC")
-      projects = JSON.parse(response.body)['projects']
+      JSON.parse(response.body)['projects']
     end
-
 
     def copy_project(options = {})
       old_project_id = options[:old_project_id]
@@ -78,35 +81,34 @@ module TeamworkScrapeClient
 
       old_project = project(old_project_id)
 
-      days_offset = 
-
-      response = mech.post('/index.cfm',
-                           action: 'CloneProject_CreateProjectClone',
-                           id: old_project_id,
-                           installationId: account['id'],
-                           'cloneproject-action' => 'copy',
-                           cloneProjectName: new_project_name,
-                           copyTasks: 'YES',
-                           copyMilestones: 'YES',
-                           copyMessages: 'YES',
-                           copyFiles: 'YES',
-                           copyLinks: 'YES',
-                           copyNotebooks: 'YES',
-                           copyTimelogs: 'YES',
-                           copyInvoices: 'YES',
-                           copyExpenses: 'YES',
-                           copyRisks: 'YES',
-                           copyPeople: 'YES',
-                           daysOffset: old_project.days_offset,
-                           keepOffWeekends: '1',
-                           createActivityLog: 'YES',
-                           createItemsUsingCurrentUser: 'NO',
-                           uncomplete: 'YES',
-                           copyComments: 'YES',
-                           copyProjectRoles: 'YES',
-                           copyLogo: 'YES',
-                           companyId: existing_company_id || 0,
-                           newCompanyName: existing_company_id ? '' : new_company_name
+      response = mech.post(
+        '/index.cfm',
+        action: 'CloneProject_CreateProjectClone',
+        id: old_project_id,
+        installationId: account['id'],
+        'cloneproject-action' => 'copy',
+        cloneProjectName: new_project_name,
+        copyTasks: 'YES',
+        copyMilestones: 'YES',
+        copyMessages: 'YES',
+        copyFiles: 'YES',
+        copyLinks: 'YES',
+        copyNotebooks: 'YES',
+        copyTimelogs: 'YES',
+        copyInvoices: 'YES',
+        copyExpenses: 'YES',
+        copyRisks: 'YES',
+        copyPeople: 'YES',
+        daysOffset: old_project.days_offset,
+        keepOffWeekends: '1',
+        createActivityLog: 'YES',
+        createItemsUsingCurrentUser: 'NO',
+        uncomplete: 'YES',
+        copyComments: 'YES',
+        copyProjectRoles: 'YES',
+        copyLogo: 'YES',
+        companyId: existing_company_id || 0,
+        newCompanyName: existing_company_id ? '' : new_company_name
       )
 
       JSON.parse(response.body)
