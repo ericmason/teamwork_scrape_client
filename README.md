@@ -22,7 +22,7 @@ Or install it yourself as:
 
 ## Usage
 
-```
+```ruby
 client = TeamworkScrapeClient::Client.new(email: 'youremail@example.com', password: 'secret_password', base_url: 'https://yourdomain.teamwork.com')
 client.copy_project(old_project_id: 12345, new_company_name: "Test Company", new_project_name: "Test Project")
 ```
