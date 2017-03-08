@@ -29,7 +29,11 @@ client = TeamworkScrapeClient::Client.new(
   base_url: 'https://yourdomain.teamwork.com'
 )
 
-client.copy_project(old_project_name: 'Template Project', new_company_name: "Test Company", new_project_name: "Test Project")
+client.copy_project(
+    old_project_name: 'Template Project', 
+    new_project_name: 'Test Project',
+    new_company_name: 'Test Company'
+)
 ```
 
 ## Development
