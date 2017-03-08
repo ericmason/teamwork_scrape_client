@@ -3,12 +3,13 @@ require 'json'
 
 module TeamworkScrapeClient
   class Client
-    attr_reader :base_url, :email, :password
+    attr_reader :base_url, :email, :password, :debug
 
     def initialize(options = {})
       @email = options[:email]
       @password = options[:password]
       @base_url = options[:base_url]
+      @debug = options[:debug]
 
       raise ArgumentError, 'email is required' unless @email
       raise ArgumentError, 'password is required' unless @password
@@ -19,7 +20,7 @@ module TeamworkScrapeClient
 
     def mech
       @mech ||= Mechanize.new do |m|
-        m.log = Logger.new(STDOUT)
+        m.log = Logger.new(STDOUT) if debug
       end
     end
 
@@ -62,12 +63,20 @@ module TeamworkScrapeClient
 
     def project_by_name(project_name)
       response = mech.get("/projects.json?getActivePages=true&searchCompany=true&formatMarkdown=false&status=active&getCategoryPath=1&userId=0&page=1&pageSize=500&orderBy=lastActivityDate&orderMode=DESC")
-      JSON.parse(response.body)['projects']
+      projects = JSON.parse(response.body)['projects']
+      projects.find { |p| p['name'] == project_name }
     end
 
     def copy_project(options = {})
-      old_project_id = options[:old_project_id]
-      raise ArgumentError, "old_project_id option is required" unless old_project_id
+      raise ArgumentError, "old_project_id or old_project_name option is required" unless options[:old_project_name] || options[:old_project_id]
+
+      old_project_id = if options[:old_project_name]
+        old_project = project_by_name(old_project_name)
+        raise "Project #{options[:old_project_name]} not found" unless old_project
+        old_project['id']
+      else
+        options[:old_project_id]
+      end
 
       new_project_name = options[:new_project_name]
       raise ArgumentError, "new_project_name option is required" unless new_project_name
