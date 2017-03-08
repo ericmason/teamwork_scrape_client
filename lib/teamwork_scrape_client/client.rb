@@ -71,7 +71,7 @@ module TeamworkScrapeClient
       raise ArgumentError, "old_project_id or old_project_name option is required" unless options[:old_project_name] || options[:old_project_id]
 
       old_project_id = if options[:old_project_name]
-        old_project = project_by_name(old_project_name)
+        old_project = project_by_name(options[:old_project_name])
         raise "Project #{options[:old_project_name]} not found" unless old_project
         old_project['id']
       else
